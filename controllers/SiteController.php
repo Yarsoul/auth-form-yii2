@@ -9,6 +9,9 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\SignupForm;
+use app\models\User;
+
 
 class SiteController extends Controller
 {
@@ -32,7 +35,7 @@ class SiteController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post'],
+                    'logout' => ['post', 'get'],
                 ],
             ],
         ];
@@ -61,6 +64,9 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        if (!Yii::$app->user->isGuest) {
+            return $this->redirect('/admin');
+        }
         return $this->render('index');
     }
 
@@ -72,15 +78,15 @@ class SiteController extends Controller
     public function actionLogin()
     {
         if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+            return $this->redirect('/admin');
+            // return $this->goHome();
         }
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+            return $this->redirect('/admin');
+            // return $this->goBack();
         }
-
-        $model->password = '';
         return $this->render('login', [
             'model' => $model,
         ]);
@@ -124,5 +130,28 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+
+    public function actionSignup()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->redirect('/admin');
+            // return $this->goHome();
+        }
+
+        $model = new SignupForm();
+        if($model->load(\Yii::$app->request->post()) && $model->validate()){
+            $user = new User();
+            $user->user_login = $model->user_login;
+            $user->user_password = \Yii::$app->security->generatePasswordHash($model->user_password);
+            if($user->save()){
+                \Yii::$app->user->login($user);
+                return $this->redirect('/admin');
+                // return $this->goHome();
+            }
+        }
+
+        return $this->render('signup', compact('model'));     
     }
 }

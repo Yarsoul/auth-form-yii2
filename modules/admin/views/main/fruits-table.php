@@ -1,0 +1,2 @@
+
+<?=  app\components\FruitsWidget::widget() ?>

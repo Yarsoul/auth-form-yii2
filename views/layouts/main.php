@@ -39,15 +39,16 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav'],
         'items' => [
-            ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'About', 'url' => ['/site/about']],
-            ['label' => 'Contact', 'url' => ['/site/contact']],
+            ['label' => 'Главная', 'url' => ['/site/index']],
+            ['label' => 'Регистрация', 'url' => ['/site/signup'], 'visible' => Yii::$app->user->isGuest,],
+            // ['label' => 'О нас', 'url' => ['/site/about']],
+            // ['label' => 'Контакты', 'url' => ['/site/contact']],
             Yii::$app->user->isGuest
-                ? ['label' => 'Login', 'url' => ['/site/login']]
+                ? ['label' => 'Вход', 'url' => ['/site/login']]     
                 : '<li class="nav-item">'
                     . Html::beginForm(['/site/logout'])
                     . Html::submitButton(
-                        'Logout (' . Yii::$app->user->identity->username . ')',
+                        'Выйти (' . Yii::$app->user->identity->user_login . ')',
                         ['class' => 'nav-link btn btn-link logout']
                     )
                     . Html::endForm()
@@ -56,9 +57,24 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     ]);
     NavBar::end();
     ?>
+
+
+
 </header>
 
 <main id="main" class="flex-shrink-0" role="main">
+    <?php if(Yii::$app->user->isGuest && ((Yii::$app->request->pathInfo == 'site/index') || (Yii::$app->request->pathInfo == ''))): ?>
+        <div class="container">
+            <a href="<?=  yii\helpers\Url::to(['/site/login'])?>">Войдите</a>
+            <br>или<br>
+            <a href="<?=  yii\helpers\Url::to(['/site/signup'])?>">Зарегистрируйтесь</a>
+        </div>
+    <?php elseif(!Yii::$app->user->isGuest): ?>
+        <div class="container">
+            <?= $this->render('_sidebar') ?>
+        </div>
+    <?php endif ?>
+    
     <div class="container">
         <?php if (!empty($this->params['breadcrumbs'])): ?>
             <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs']]) ?>
